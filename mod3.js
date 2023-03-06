@@ -1,99 +1,81 @@
-//Step 1: Script
+// Step 1
 
-function Employee(id, firstName, lastName, gender, age, position) {
-    this.id = id;
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.gender = gender;
-    this.age = age;
-    this.position = position;
+const fs = require("fs");
+const util = require("util");
+
+const employeeRawData = fs.readFileSync("Workshop_JSON_Employees.txt", "utf8");
+const salesRawData = fs.readFileSync("Workshop_JSON_Sales.txt", "utf8");
+
+// Parse read file to JSON format
+const employees = JSON.parse(employeeRawData);
+const sales = JSON.parse(salesRawData);
+
+// Step 2
+
+// Step 3
+function findEmployeeById(id) {
+  return employees.filter((employee) => {
+    return employee.id === id;
+  });
+}
+function findSalesById(id) {
+  return sales.filter((sale) => {
+    return sale.staffId === id;
+  });
 }
 
-function Sale(id, item, price, date) {
-    this.id = id;
-    this.item = item;
-    this.price = price;
-    this.date = date;
+module.exports = {
+  findEmployeeById,
+  findSalesById,
+};
+
+// Step 4
+function filterEmployees(prop, value) {
+  return employees.filter((employee) => {
+    return employee[prop] === value;
+  });
+}
+function filterSales(prop, value) {
+  return sales.filter((sale) => {
+    return sale[prop] === value;
+  });
 }
 
-const employees = [
-    new Employee(1, "John", "Smith", "Male", 23, "Manager"),
-    new Employee(2, "Mary", "Sue", "Female", 32, "Salesperson"),
-    new Employee(3, "Fred", "Jones", "Non-Binary", 54, "Salesperson"),
-    new Employee(4, "Jane", "Doe", "Female", 41, "Accounant"),
-    new Employee(5, "Joe", "Bloggs", "Male", 65, "IT Administrator")
-] 
-
-const sales = [
-    new Sale(1, "Wi-Fi Adapter", 40.00, "01-09-2022"),
-    new Sale(1, "Wi-Fi Adapter", 40.00, "03-09-2022"),
-    new Sale(1, "USB Cable", 5.00, "03-09-2022"),
-    new Sale(1, "Thermal Paste", 40.00, "05-09-2022"),
-    new Sale(1, "Wi-Fi Adapter", 40.00, "07-09-2022"),
-    new Sale(2, "USB Stick", 10.99, "06-09-2022"),
-    new Sale(3, "Pre-built PC", 1999.95, "02-09-2022"),
-    new Sale(3, "USB Cable", 5.00, "02-09-2022"),
-    new Sale(3, "HDMI Cable", 15.45, "02-09-2022")
-]
-
-//Step 2: Function (a)
-function showEmployeeDetails (employee) {
-    console.log(`Name: ${employee.firstName} ${employee.lastName}\nStaff ID: ${employee.id}\nAge and Gender: ${employee.age}, ${employee.gender}\nPosition: ${employee.position}`)
-}
-
-function showSaleDetails (sale) {
-    console.log(`Staff ID: ${sale.id}\nDate of sale: ${sale.date}\nItem Sold: ${sale.item}\nItem Price: ${sale.price}`)
-}
-
-function viewAllEmployees(employees) {
-    for (let i = 0; i < employees.length; i++) {
-        showEmployeeDetails(employees[i]);
+// Bonus Tasks
+function addSalesDataToEmployees() {
+  const employeesWithSales = [];
+  for (let i = 0; i < employees.length; i++) {
+    const employee = employees[i];
+    employee.sales = [];
+    for (let j = 0; j < sales.length; j++) {
+      const sale = sales[j];
+      if (employee.id === sale.staffId) {
+        employee.sales.push(sale);
+      }
     }
+    employeesWithSales.push(employee);
+  }
+
+  return employeesWithSales;
 }
 
-function viewAllSales(sales) {
-    for (let i = 0; i < sales.length; i++) {
-        showSaleDetails(sales[i]);
+function formatEmployeeAndSalesData() {
+  const employeesWithSales = addSalesDataToEmployees();
+  for (let i = 0; i < employeesWithSales.length; i++) {
+    const employee = employeesWithSales[i];
+    let totalSales = 0;
+    if (employee.sales.length > 0) {
+      for (let j = 0; j < employee.sales.length; j++) {
+        const sale = employee.sales[j];
+        totalSales += sale.price;
+      }
+      console.log(
+        `${employee.firstName} ${employee.lastName} who holds the position of ${employee.position} has made a total of $${totalSales}`
+      );
+    } else {
+      console.log(
+        `${employee.firstName} ${employee.lastName} who holds the position of ${employee.position} has made a total of $${totalSales}`
+      );
     }
+  }
 }
-
-//Step 3: Function (b)
-function findEmployeeWithId (id) {
-    for (let i = 0; i < employees.length; i++) {
-        if (employees[i].id === id) {
-            return employees[i];
-        }
-    }
-    console.log(`No employee with ID ${id} found!`)
-}
-
-function findSaleById(id, sales) {
-    for (let i = 0; i < sales.length; i++) {
-        if (sales[i].id === id) {
-            return sales[i];
-        }
-    }
-    console.log(`No employee with ID ${id} found!`);
-}
-
-//Step 4: Function (c)
-function findEmployeesWithPosition(position, employees) {
-    for (let i = 0; i < employees.length; i++) {
-        if (employees[i].position === position) {
-            console.log(`Employee with staff ID ${employees[i].id} is a ${position}`)
-        }
-    }
-}
-
-function findSaleOverTenDollars() {
-    for (let i = 0; i < sales.length; i++) {
-        if (sales[i].price > 10) {
-            console.log(`Staff ${sales[i].id} sold "${sales[i].item}" for ${sales[i].price}`)
-        }
-    }
-}
-
-console.log(viewAllEmployees(employees))
-console.log(findEmployeesWithPosition("Salesperson", employees))
-findSaleOverTenDollars()
-
